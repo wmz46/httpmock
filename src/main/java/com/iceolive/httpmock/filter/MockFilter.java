@@ -27,6 +27,9 @@ public class MockFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String url = request.getServletPath();
         MockData result = mockService.get(url, method, request.getParameterMap());
+
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "*");
         response.setContentType(result.getContentType());
         response.setStatus(result.getCode());
         response.getWriter()
