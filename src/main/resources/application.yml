@@ -1,2 +1,5 @@
 server:
   port: 8080
+mock:
+  readFromResource: true #如果为true，则mock.json读取资源文件，否则读取filepath的路径
+  filepath: /mock.json #当 readFromResource=false时生效，"/"开头表示和jar包目录的相对路径，也可以写绝对路径

@@ -3,14 +3,14 @@ package com.iceolive.httpmock.service;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.iceolive.httpmock.model.MockData;
+import com.iceolive.httpmock.util.PathUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,11 @@ import java.util.Map;
 @Service
 public class MockService {
     private List<MockData> mockDataList;
+    @Value("${mock.readFromResource}")
+    private boolean readFromResource;
+    @Value("${mock.filepath}")
+    private String mockFile;
+
 
     public  List<MockData> getMockDataList() {
         if (this.mockDataList != null) {
@@ -31,7 +36,14 @@ public class MockService {
         InputStream inputStream = null;
         ByteArrayOutputStream baos = null;
         try {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream("mock.json");
+            if(readFromResource){
+                inputStream = this.getClass().getClassLoader().getResourceAsStream("mock.json");
+            }else {
+                if (mockFile.startsWith("/") || mockFile.startsWith("\\")) {
+                    mockFile = PathUtil.getRootPath() + mockFile;
+                }
+                inputStream = new FileInputStream(new File(mockFile));
+            }
             baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length;
