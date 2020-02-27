@@ -1,0 +1,26 @@
+[
+  {
+    "url": "/api/abc",
+    "method": "get",
+    "code": 200,
+    "contentType": "application/json;charset=UTF-8",
+    "rule": "name=李四",
+    "result": "我是李四"
+  },
+  {
+    "url": "/api/abc",
+    "method": "get",
+    "code": 200,
+    "contentType": "application/json;charset=UTF-8",
+    "rule": "name*=李",
+    "result": "我姓李"
+  },
+  {
+    "url": "/api/abc",
+    "method": "get",
+    "code": 200,
+    "contentType": "application/json;charset=UTF-8",
+    "rule": "name!=李四",
+    "result": "我不是李四"
+  }
+]
