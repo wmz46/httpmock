@@ -13,7 +13,7 @@
     "code": 200,
     "contentType": "application/json;charset=UTF-8",
     "rule": "name*=李",
-    "result": "我姓李"
+    "result": "我是${name}"
   },
   {
     "url": "/api/abc",
@@ -22,5 +22,21 @@
     "contentType": "application/json;charset=UTF-8",
     "rule": "name!=李四",
     "result": "我不是李四"
+  },
+  {
+    "url": "/JIS/front/login.do",
+    "ignoreCase": false,
+    "method": "get",
+    "code": 302,
+    "rule": "uuid=zTvu1YRQCTur",
+    "result": "${redirectUrl}"
+  },
+  {
+    "url": "/JIS/front/login.do",
+    "ignoreCase": false,
+    "method": "get",
+    "code": 500,
+    "rule": "uuid!=zTvu1YRQCTur",
+    "result": "uuid错误"
   }
 ]

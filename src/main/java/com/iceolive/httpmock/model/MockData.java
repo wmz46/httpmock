@@ -8,10 +8,11 @@ import lombok.Data;
 @Data
 public class MockData {
     private String url;
-    private String method;
+    private boolean ignoreCase = true;
+    private String method = "get";
     private String rule;
     private String result;
-    private int code;
-    private String contentType;
+    private int code = 404;
+    private String contentType = "application/json;charset=UTF-8";
 
 }

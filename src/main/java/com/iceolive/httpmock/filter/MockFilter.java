@@ -27,13 +27,17 @@ public class MockFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String url = request.getServletPath();
         MockData result = mockService.get(url, method, request.getParameterMap());
-
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "*");
-        response.setContentType(result.getContentType());
-        response.setStatus(result.getCode());
-        response.getWriter()
-                .write(result.getResult());
+        if(result.getCode()==302){
+            response.setStatus(result.getCode());
+            response.setHeader("location", result.getResult());
+        }else {
+            response.setContentType(result.getContentType());
+            response.setStatus(result.getCode());
+            response.getWriter()
+                    .write(result.getResult());
+        }
 
     }
 }

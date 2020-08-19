@@ -14,6 +14,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author 钢翼
@@ -28,6 +30,7 @@ public class MockService {
     private String mockFile;
 
 
+    final Pattern pattern =  Pattern.compile("\\$\\{(.*)\\}");
     public  List<MockData> getMockDataList() {
         if (this.mockDataList != null) {
             return this.mockDataList;
@@ -75,51 +78,67 @@ public class MockService {
     public MockData get(String url, String method, Map<String, String[]> params) {
         for (MockData mockData : getMockDataList()) {
             boolean match = true;
-            if (mockData.getMethod().toLowerCase().equals(method.toLowerCase()) && mockData.getUrl().toLowerCase().equals(url.toLowerCase())) {
+            boolean matchUrl = false;
+            if(mockData.isIgnoreCase()){
+                if (mockData.getMethod().toLowerCase().equals(method.toLowerCase()) && mockData.getUrl().toLowerCase().equals(url.toLowerCase())) {
+                    matchUrl = true;
+                }
+            }else{
+                if (mockData.getMethod().toLowerCase().equals(method.toLowerCase()) && mockData.getUrl().equals(url)) {
+                    matchUrl = true;
+                }
+            }
+            if (matchUrl) {
                 String rule = mockData.getRule();
-                for (String p : rule.split("&")) {
-                    String name = null;
-                    String value = null;
-                    String operate = null;
-                    if (p.indexOf("!=") > -1) {
-                        name = p.split("!=")[0];
-                        value = p.split("!=")[1];
-                        operate = "!=";
-                    } else if (p.indexOf("*=") > -1) {
-                        name = p.split("\\*=")[0];
-                        value = p.split("\\*=")[1];
-                        operate = "*=";
+                if(!StringUtils.isEmpty(rule)) {
 
-                    } else if (p.indexOf("=") > -1) {
-                        name = p.split("=")[0];
-                        value = p.split("=")[1];
-                        operate = "=";
-                    } else {
-                        match = false;
-                        break;
-                    }
-                    if (params.containsKey(name)) {
-                        String value1 = params.get(name)[0];
-                        if (operate.equals("!=")) {
-                            if (value.equals(value1)) {
-                                match = false;
-                                break;
-                            }
-                        } else if (operate.equals("*=")) {
-                            if (value1.indexOf(value) == -1) {
-                                match = false;
-                                break;
-                            }
-                        } else if (operate.equals("=")) {
-                            if (!value.equals(value1)) {
-                                match = false;
-                                break;
-                            }
+
+                    for (String p : rule.split("&")) {
+                        String name = null;
+                        String value = null;
+                        String operate = null;
+                        if (p.indexOf("!=") > -1) {
+                            name = p.split("!=")[0];
+                            value = p.split("!=")[1];
+                            operate = "!=";
+                        } else if (p.indexOf("*=") > -1) {
+                            name = p.split("\\*=")[0];
+                            value = p.split("\\*=")[1];
+                            operate = "*=";
+
+                        } else if (p.indexOf("=") > -1) {
+                            name = p.split("=")[0];
+                            value = p.split("=")[1];
+                            operate = "=";
+                        } else {
+                            match = false;
+                            break;
                         }
-                    } else {
-                        match = false;
+                        if (params.containsKey(name)) {
+                            String value1 = params.get(name)[0];
+                            if (operate.equals("!=")) {
+                                if (value.equals(value1)) {
+                                    match = false;
+                                    break;
+                                }
+                            } else if (operate.equals("*=")) {
+                                if (value1.indexOf(value) == -1) {
+                                    match = false;
+                                    break;
+                                }
+                            } else if (operate.equals("=")) {
+                                if (!value.equals(value1)) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            match = false;
 
+                        }
                     }
+                }else{
+                    match = true;
                 }
             } else {
                 match = false;
@@ -128,6 +147,16 @@ public class MockService {
                 if (StringUtils.isEmpty(mockData.getContentType())) {
                     mockData.setContentType("application/json;charset=UTF-8");
                 }
+                String str = mockData.getResult();
+                Matcher matcher =  pattern.matcher(str);
+                while (matcher.find()){
+                    String name = matcher.group(1);
+                    if(params.containsKey(name)){
+                        String value = params.get(name)[0];
+                        str = str.replace(matcher.group(0),value);
+                    }
+                }
+                mockData.setResult(str);
                 return mockData;
             }
         }
