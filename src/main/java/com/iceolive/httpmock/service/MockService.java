@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,10 +30,15 @@ public class MockService {
     @Value("${mock.filepath}")
     private String mockFile;
 
+    private Date lastReadTime = null;
 
     final Pattern pattern =  Pattern.compile("\\$\\{(.*)\\}");
     public  List<MockData> getMockDataList() {
-        if (this.mockDataList != null) {
+        if (this.mockDataList  != null && readFromResource) {
+            //读取资源时缓存
+            return this.mockDataList;
+        }else if (this.mockDataList  != null  && (System.currentTimeMillis() -  lastReadTime.getTime()<30*1000)) {
+            //如果读取外部文件，则缓存30秒
             return this.mockDataList;
         }
         List<MockData> result = new ArrayList<MockData>();
@@ -72,6 +78,7 @@ public class MockService {
             }
         }
         this.mockDataList = result;
+        lastReadTime = new Date();
         return this.mockDataList;
     }
 
