@@ -11,14 +11,21 @@
     "contentType": "application/json;charset=UTF-8", //返回的内容类型
     "rule": "name=李四", //条件(为空则只匹配url)，格式：[参数][匹配符号][值]，匹配符号可以是=（全匹配）、 *=（模糊匹配）、 !=(不匹配)，多个条件用& 分割，不支持or查询
     "result": "我是李四" //返回的内容，如果状态码为302，则为重定向路径
-  },
+  }, 
   {
-    "url": "/JIS/front/register/perregister1.do",
+    "url": "/api/abc",
     "method": "get",
-    "ignoreCase": false,//url是否忽略大小写，默认为true。
-    "code": 302, 
-    "rule": "uuid=zTvu1YRQCTur",
-    "result": "http://www.baidu.com"
+    "code": 200,
+    "contentType": "application/json;charset=UTF-8",
+    "result": "我是${name}"
+  },
+ {
+    "url": "/api/def",
+    "ignoreCase": false,
+    "method": "get",
+    "code": 302,
+    "rule": "uuid=123",
+    "result": "${redirectUrl}"
   }
 ]
 ``` 
