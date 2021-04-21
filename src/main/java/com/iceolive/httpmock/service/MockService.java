@@ -193,6 +193,10 @@ public class MockService {
                 StringBuilder sb = new StringBuilder();
                 String lineTxt = null;
                 while ((lineTxt = bufferedReader.readLine()) != null) {
+                    //解决utf-8文件头BOM问题
+                    if (lineTxt.startsWith("\uFEFF")) {
+                        lineTxt = lineTxt.substring(1);
+                    }
                     sb.append(lineTxt + "\n");
                 }
                 read.close();
