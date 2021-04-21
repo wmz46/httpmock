@@ -32,12 +32,13 @@ public class MockService {
 
     private Date lastReadTime = null;
 
-    final Pattern pattern =  Pattern.compile("\\$\\{(.*)\\}");
-    public  List<MockData> getMockDataList() {
-        if (this.mockDataList  != null && readFromResource) {
+    final Pattern pattern = Pattern.compile("\\$\\{(.*)\\}");
+
+    public List<MockData> getMockDataList() {
+        if (this.mockDataList != null && readFromResource) {
             //读取资源时缓存
             return this.mockDataList;
-        }else if (this.mockDataList  != null  && (System.currentTimeMillis() -  lastReadTime.getTime()<30*1000)) {
+        } else if (this.mockDataList != null && (System.currentTimeMillis() - lastReadTime.getTime() < 30 * 1000)) {
             //如果读取外部文件，则缓存30秒
             return this.mockDataList;
         }
@@ -45,9 +46,9 @@ public class MockService {
         InputStream inputStream = null;
         ByteArrayOutputStream baos = null;
         try {
-            if(readFromResource){
+            if (readFromResource) {
                 inputStream = this.getClass().getClassLoader().getResourceAsStream("mock.json");
-            }else {
+            } else {
                 if (mockFile.startsWith("/") || mockFile.startsWith("\\")) {
                     mockFile = PathUtil.getRootPath() + mockFile;
                 }
@@ -86,18 +87,18 @@ public class MockService {
         for (MockData mockData : getMockDataList()) {
             boolean match = true;
             boolean matchUrl = false;
-            if(mockData.isIgnoreCase()){
+            if (mockData.isIgnoreCase()) {
                 if (mockData.getMethod().toLowerCase().equals(method.toLowerCase()) && mockData.getUrl().toLowerCase().equals(url.toLowerCase())) {
                     matchUrl = true;
                 }
-            }else{
+            } else {
                 if (mockData.getMethod().toLowerCase().equals(method.toLowerCase()) && mockData.getUrl().equals(url)) {
                     matchUrl = true;
                 }
             }
             if (matchUrl) {
                 String rule = mockData.getRule();
-                if(!StringUtils.isEmpty(rule)) {
+                if (!StringUtils.isEmpty(rule)) {
 
 
                     for (String p : rule.split("&")) {
@@ -144,7 +145,7 @@ public class MockService {
 
                         }
                     }
-                }else{
+                } else {
                     match = true;
                 }
             } else {
@@ -154,13 +155,21 @@ public class MockService {
                 if (StringUtils.isEmpty(mockData.getContentType())) {
                     mockData.setContentType("application/json;charset=UTF-8");
                 }
-                String str = mockData.getResult();
-                Matcher matcher =  pattern.matcher(str);
-                while (matcher.find()){
+                String str = "";
+                if (StringUtils.isEmpty(mockData.getFilePath())) {
+                    //如果filePath为空，则取result
+                    str = mockData.getResult();
+                } else {
+                    str = readTxtFile(mockData.getFilePath(), "UTF-8");
+                }
+
+
+                Matcher matcher = pattern.matcher(str);
+                while (matcher.find()) {
                     String name = matcher.group(1);
-                    if(params.containsKey(name)){
+                    if (params.containsKey(name)) {
                         String value = params.get(name)[0];
-                        str = str.replace(matcher.group(0),value);
+                        str = str.replace(matcher.group(0), value);
                     }
                 }
                 mockData.setResult(str);
@@ -172,5 +181,28 @@ public class MockService {
         mockData.setCode(500);
         mockData.setResult("匹配不到mock路由规则");
         return mockData;
+    }
+
+    private static String readTxtFile(String filePath, String encoding) {
+        try {
+            File file = new File(filePath);
+            //判断文件是否存在
+            if (file.isFile() && file.exists()) {
+                InputStreamReader read = new InputStreamReader(new FileInputStream(file), encoding);
+                BufferedReader bufferedReader = new BufferedReader(read);
+                StringBuilder sb = new StringBuilder();
+                String lineTxt = null;
+                while ((lineTxt = bufferedReader.readLine()) != null) {
+                    sb.append(lineTxt + "\n");
+                }
+                read.close();
+                return sb.toString();
+            } else {
+                throw new RuntimeException("找不到指定的文件");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("读取文件内容出错", e);
+        }
+
     }
 }

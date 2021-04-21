@@ -26,6 +26,17 @@
     "code": 302,
     "rule": "uuid=123",
     "result": "${redirectUrl}"
-  }
+  },
+  {
+       "url": "/phone",
+       "ignoreCase": false,
+       "method": "get",
+       "code": 200,
+       "rule": "",
+       "contentType":"text/html",//返回网页
+       "result": "",
+       "filePath":"C:\\phone.html", //外部文件路径，优先级高于result，固定以utf-8编码读取文件文本内容
+       "desc": "支持外部文件"
+     }
 ]
 ``` 
